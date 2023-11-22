@@ -8,19 +8,18 @@ import csv
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-def download_repo(repo):
+def download_repo(repo, verbose=False):
     file_name = repo.split("/")[-1]
-    if file_name not in os.listdir("output/"):
-        os.system(f'git clone --depth 1 --single-branch https://github.com/{repo} output/{file_name}')
-    else:
-        print(f"Already downloaded {repo}")
+    if file_name not in os.listdir("/data/github-repos/"):
+        # Use " > /dev/null 2>&1" to suppress output
+        os.system(f'git clone --depth 1 --single-branch git@github.com:{repo} /data/github-repos/{file_name}' + ('' if verbose else ' > /dev/null 2>&1'))
 
 with open('github_repositories.csv', 'r') as f:
     csv_reader = csv.reader(f)
     repositories = list(map(tuple, csv_reader))
 
-if 'output' not in os.listdir():
-    os.makedirs('output')
+if not os.path.exists('/data/github-repos/'):
+    os.makedirs('/data/github-repos/')
 
 
 repo_names = [repo[0] for repo in repositories]

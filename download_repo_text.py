@@ -171,10 +171,11 @@ def _process_repo(repo_data, repodir):
     try:
         for curdir, dirs, files in os.walk(repodir):
 
-            files = [curdir + '/' + f for f in files if '.git' not in f and f[
-                0] is not '.' and 'LICENSE' not in f and 'node_modules' not in f and '.min.' not in f and f.split('.')[
-                         -1] not in bad_extensions]
-
+            # files = [curdir + '/' + f for f in files if '.git' not in f and f[
+            #     0] is not '.' and 'LICENSE' not in f and 'node_modules' not in f and '.min.' not in f and f.split('.')[
+            #              -1] not in bad_extensions]
+            
+            files = [curdir + '/' + f for f in files if f[0] != '.' and f.split('.')[-1] == 'py']
             filenames = [f.split("/")[-1] for f in files]
             extensions = []
             for f in files:
@@ -260,6 +261,7 @@ def process_args():
 
 
 if __name__ == '__main__':
+    DATA_PATH = '/data/github_data'
 
     args = process_args()  # parse args
     verbose = args.verbose
@@ -267,8 +269,8 @@ if __name__ == '__main__':
     # make output dirs
     if '.tmp' not in os.listdir():
         os.makedirs('.tmp')
-    if 'github_data' not in os.listdir():
-        os.makedirs('github_data')
+    if not os.path.exists(DATA_PATH):
+        os.makedirs(DATA_PATH)
 
     # read repo data to a tuple (reponame, n_stars, language)
     with open('github_repositories.csv', 'r') as f:
@@ -279,6 +281,25 @@ if __name__ == '__main__':
     if args.n_stars != -1:
         repo_data = filter_by_stars(repo_data, args.n_stars)
     repo_data.sort()
+    print(len(repo_data))
+
+    # counts = []
+    # max_stars = int(max(repo_data, key=lambda x: x[1])[1])
+    # n = 100
+    # x = range(0, max_stars + max_stars // n, max_stars // n)
+    # for i in x:
+    #     counts.append(len(filter_by_stars(repo_data, i)))
+
+    # for r in zip(x, counts):
+    #     print(r)
+    
+    # import matplotlib.pyplot as plt
+    # plt.plot(x, counts)
+    # plt.xlabel('Minimum number of stars')
+    # plt.ylabel('Number of repositories')
+    # plt.tight_layout()
+    # plt.savefig('repo_count.png')
+    # exit(0)
 
     random.seed(420)
     random.shuffle(repo_data)
@@ -290,8 +311,7 @@ if __name__ == '__main__':
 
     # do work
     repo_chunks = split_into_chunks(repo_data, chunk_size)
-    archive_name = 'github_data'
-    ar = lmd.Archive(archive_name)
+    ar = lmd.Archive(DATA_PATH)
     pool = Pool(n_threads)
     pbar = tqdm(repo_chunks, total=len(repo_chunks))
     success_hist = []
