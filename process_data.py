@@ -3,7 +3,7 @@ from lm_dataformat import Reader
 from datasets import Dataset
 
 
-DATA_PATH = '/data/github_data'
+DATA_PATH = '/data/github_data2'
 
 
 def find_fn_defs(node):
@@ -18,6 +18,7 @@ def find_fn_defs(node):
 
 def generator():
     reader = Reader(DATA_PATH)
+    count = 0
     for example in reader.stream_data():
         # Try parsing Python code into an abstract syntax tree
         try:
@@ -31,10 +32,12 @@ def generator():
                     'signature': signature, 
                     'body': body
                 }
+            count += 1
         except GeneratorExit:
             return
         except:     # Ignore all other errors due to badly formatted code
             pass
+    print(f'Finished processing {count} files')
 
 
 # Process the data and upload to Huggingface
