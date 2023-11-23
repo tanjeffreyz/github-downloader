@@ -22,19 +22,22 @@ def generator():
         # Try parsing Python code into an abstract syntax tree
         try:
             root = ast.parse(example)
-        except:
-            continue
 
-        # Find all function definitions in the AST
-        for fn_def in find_fn_defs(root):
-            fn_string = ast.unparse(fn_def)
-            signature, body = fn_string.split('\n', 1)
-            yield {
-                'signature': signature, 
-                'body': body
-            }
+            # Find all function definitions in the AST
+            for fn_def in find_fn_defs(root):
+                fn_string = ast.unparse(fn_def)
+                signature, body = fn_string.split('\n', 1)
+                yield {
+                    'signature': signature, 
+                    'body': body
+                }
+        except GeneratorExit:
+            return
+        except:     # Ignore all other errors due to badly formatted code
+            pass
 
 
+# Process the data and upload to Huggingface
 dataset = Dataset.from_generator(generator)
 dataset.push_to_hub('LLM-PBE/github-python', private=True)
 

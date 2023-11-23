@@ -261,7 +261,7 @@ def process_args():
 
 
 if __name__ == '__main__':
-    DATA_PATH = '/data/github_data'
+    DATA_PATH = '/data/github_data2'
 
     args = process_args()  # parse args
     verbose = args.verbose
